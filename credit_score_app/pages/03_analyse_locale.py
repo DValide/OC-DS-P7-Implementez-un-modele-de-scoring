@@ -13,6 +13,9 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import seaborn as sns
 import shap
+import requests
+import json
+import urllib.request
 #Options
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
@@ -67,12 +70,16 @@ best_model = pickle.load( open( "../credit_score_app/static/data/best_model.pick
 #test = pd.read_csv('../credit_score_app/static/data/test_preprocess.csv')
 #test = test.set_index('SK_ID_CURR')
 
-file_name = '../credit_score_app/static/data/pred.json'
+#file_name = '../credit_score_app/static/data/pred.json'
 
-with open(file_name, 'r', encoding='utf-8') as f:
-    df = json.load(f)
+#‼with open(file_name, 'r', encoding='utf-8') as f:
+#   df = json.load(f)
 # Seuil = 0.675
-
+import urllib
+#url = "http://127.0.0.1:5000/prediction_complete"
+url=  https://dash-scoring.herokuapp.com/prediction_complete
+df = urllib.request.urlopen(url).read()
+df = json.load(urllib.urlopen(url))
 #st.markdown("#  <center> :moneybag: Analyse micro :moneybag:  </center> ", unsafe_allow_html=True)
 
 
