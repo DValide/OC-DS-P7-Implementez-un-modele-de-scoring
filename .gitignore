@@ -1,0 +1,9 @@
+*.pyc
+credit_score_app/tests/*
+__pycache__
+app.db
+geckodriver.log
+.cache/
+.ipynb_checkpoints/
+*.ipynb
+env/
