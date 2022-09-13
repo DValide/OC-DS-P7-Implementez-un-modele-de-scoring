@@ -46,8 +46,8 @@ st.markdown("#  <center>  Dashboard scoring client </center>", unsafe_allow_html
 
 st.sidebar.success("Selectionnez un mode d'analyse.")
 
-logo =  Image.open("../credit_score_app/static/images/logo_entreprise.png") 
-logo_home = Image.open("../credit_score_app/static/images/home_credit_logo.png")
+logo =  Image.open("./static/images/logo_entreprise.png") 
+logo_home = Image.open("./static/images/home_credit_logo.png")
 
 col1, col2, col3 = st.columns([1,1,1])
 

@@ -77,7 +77,7 @@ best_model = pickle.load( open( "../credit_score_app/static/data/best_model.pick
 # Seuil = 0.675
 import urllib
 #url = "http://127.0.0.1:5000/prediction_complete"
-url=  https://dash-scoring.herokuapp.com/prediction_complete
+url=  "https://dash-scoring.herokuapp.com/prediction_complete"
 df = urllib.request.urlopen(url).read()
 df = json.load(urllib.urlopen(url))
 #st.markdown("#  <center> :moneybag: Analyse micro :moneybag:  </center> ", unsafe_allow_html=True)
