@@ -71,8 +71,8 @@ test_origin = pickle.load( open( "../credit_score_app/static/data/test_predictio
 #test = pd.read_csv('../credit_score_app/static/data/test_preprocess_sample.csv')
 #test = test.set_index('SK_ID_CURR')
 
-url = "http://127.0.0.1:5000/prediction_complete"
-#url=  "https://dash-scoring.herokuapp.com/prediction_complete"
+#url = "http://127.0.0.1:5000/prediction_complete"
+url=  "https://dash-scoring.herokuapp.com/prediction_complete"
 with urllib.request.urlopen(url) as url:
     data = json.loads(url.read())
     #st.write(data)

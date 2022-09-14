@@ -70,22 +70,15 @@ test_origin = pickle.load( open( "../credit_score_app/static/data/test_predictio
 #test = pd.read_csv('../credit_score_app/static/data/test_preprocess_sample.csv')
 #test = test.set_index('SK_ID_CURR')
 
-url = "http://127.0.0.1:5000/prediction_complete"
-#url=  "https://dash-scoring.herokuapp.com/prediction_complete"
+#url = "http://127.0.0.1:5000/prediction_complete"
+url=  "https://dash-scoring.herokuapp.com/prediction_complete"
 with urllib.request.urlopen(url) as url:
     data = json.loads(url.read())
     #st.write(data)
     df =pd.DataFrame.from_dict(data)
 df = df.T
-#dico = json.loads(pred)
+
 st.write(df)
-#df = pd.read_json('pred')
-# Seuil = 0.675
-#file_name = '../credit_score_app/static/data/pred.json'
-
-#with open(file_name, 'r', encoding='utf-8') as f:
-#    df = json.load(f)
-
 
 st.sidebar.markdown("# 🧐🔎Analyse globale 🧐🔎")
 st.markdown("#  <center> 🧐🔎 Analyse globale 🧐🔎 </center> ", unsafe_allow_html=True)
@@ -259,8 +252,11 @@ st.pyplot()
 
 fig,ax=plt.subplots( figsize=(10,4))
 ax =shap.dependence_plot("CREDIT_TO_ANNUITY_RATIO", shap_value[0],test)
-st.pyplot(fig)
+st.pyplot()
 
 fig,ax=plt.subplots( figsize=(10,4))
 ax = shap.dependence_plot("EXT_SOURCE_2", shap_value[0], test)
-st.pyplot(fig)
+st.pyplot()
+
+ax =shap.dependence_plot("DAYS_BIRTH", shap_value[0],test)
+st.pyplot()
