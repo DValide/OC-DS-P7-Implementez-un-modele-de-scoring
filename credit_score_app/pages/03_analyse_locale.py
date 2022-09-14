@@ -57,6 +57,7 @@ html_header="""
 """
 st.markdown('<style>body{background-color: #fbfff0}</style>',unsafe_allow_html=True)
 st.markdown(html_header, unsafe_allow_html=True)
+html_header
 
 #st.markdown("# Analyse locale ")
 #st.sidebar.markdown("# Analyse locale ")
@@ -236,7 +237,7 @@ def affiche_facteurs_influence():
         
         st.markdown(html_facteurs_influence, unsafe_allow_html=True)
 
-        with st.spinner('**Affiche les facteurs d\'influence du client courant...**'):                 
+        with st.spinner('**Affichpe les facteurs d\'influence du client courant...**'):                 
                        
             #with st.expander('Facteurs d\'influence du client courant',
             #                  expanded=True):
