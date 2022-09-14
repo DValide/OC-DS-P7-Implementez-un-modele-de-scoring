@@ -68,12 +68,10 @@ def pred_model():
     df_pred['Proba']=y_pred
     df_pred['PREDICTION']=y_seuil
 
-    test_prediction = df_pred.to_json()
-    with open("./credit_score_app/static/data/pred.json", "w") as outfile:
-        outfile.write(test_prediction)
-    return jsonify({'status': 'ok',
-                    'df': test_prediction,
-                    })
+    test_prediction = df_pred.to_json(orient = 'index')
+    #with open("./credit_score_app/static/data/pred.json", "w") as outfile:
+        #outfile.write(test_prediction)
+    return  test_prediction
 # Run app.
 # Note : comment this line if you want to deploy on heroku
 if __name__ == '__main__':

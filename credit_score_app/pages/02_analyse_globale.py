@@ -65,15 +65,21 @@ st.markdown(html_header, unsafe_allow_html=True)
 #shap_values_test = pickle.load( open( "../credit_score_app/static/data/shap_values_test.p", "rb" ) )
 #df_shap_test = pickle.load( open( "../credit_score_app/static/data/df_shap_test.p", "rb" ) )
 best_model = pickle.load( open( "../credit_score_app/static/data/best_model.pickle", "rb" ) )
-#df = pickle.load( open( "../credit_score_app/static/data/test_prediction.pickle", "rb" ) )
+test_origin = pickle.load( open( "../credit_score_app/static/data/test_prediction.pickle", "rb" ) )
 #test = pickle.load( open( "../credit_score_app/static/data/test_preprocess.p","rb") )
 #test = pd.read_csv('../credit_score_app/static/data/test_preprocess_sample.csv')
 #test = test.set_index('SK_ID_CURR')
 
-#url = "http://127.0.0.1:5000/prediction_complete"
-url=  "https://dash-scoring.herokuapp.com/prediction_complete"
-df = urllib.request.urlopen(url).read()
-df = json.load(urllib.urlopen(url))
+url = "http://127.0.0.1:5000/prediction_complete"
+#url=  "https://dash-scoring.herokuapp.com/prediction_complete"
+with urllib.request.urlopen(url) as url:
+    data = json.loads(url.read())
+    #st.write(data)
+    df =pd.DataFrame.from_dict(data)
+df = df.T
+#dico = json.loads(pred)
+st.write(df)
+#df = pd.read_json('pred')
 # Seuil = 0.675
 #file_name = '../credit_score_app/static/data/pred.json'
 
@@ -97,7 +103,7 @@ st.write("Exemple d'ID : 100172, 100013, 455955")
 
  #Récupération des informations du client
 
-data_client=df[df.SK_ID_CURR==int(ID_client)]
+data_client=test_origin[test_origin.SK_ID_CURR==int(ID_client)]
 col1, col2 = st.columns(2)
 with col1:
     st.write('__Info crédit__')
@@ -174,13 +180,9 @@ application_samples_component()
 # Recupération des indicateurs impliqués dans le calcul
 
 
-#df1 = df.copy()
-#df1.loc[df1.Proba > 60, 'ACCORD_CREDIT'] = "Risque de défaut"  
-#df1.loc[df1.Proba <= 60, 'ACCORD_CREDIT'] = 'Crédit accordé' 
 
 
-
-df_type=df.drop(columns =['SK_ID_CURR','PREDICTION'])
+df_type=test_origin.drop(columns =['SK_ID_CURR','PREDICTION'])
 df_num=df_type.select_dtypes(include = 'number')
 
 ## Select qualitative columns
@@ -192,12 +194,12 @@ Col_num = st.selectbox(
 st.subheader(Col_num)
 #fig,ax=plt.subplots( figsize=(10,4))
     
-x0 = df[df['PREDICTION']==0][Col_num]
-y0 = df[df['PREDICTION']==1][Col_num]
-z0 = df[Col_num]
+x0 = test_origin[test_origin['PREDICTION']==0][Col_num]
+y0 = test_origin[test_origin['PREDICTION']==1][Col_num]
+z0 = test_origin[Col_num]
 bins = np.linspace(0, 1, 15)
 
-risque_client=df[df['SK_ID_CURR']==ID_client][Col_num].item()
+risque_client=test_origin[test_origin['SK_ID_CURR']==ID_client][Col_num].item()
     
 
 group_labels = ['Solvable', 'Non solvable','Global']
@@ -221,17 +223,17 @@ Col = st.selectbox(
      list(df_object.columns))
 
 st.subheader(Col)
-sizes0 = list(df[Col][df['PREDICTION']==0].value_counts().values)
-labels0 =list(df[Col][df['PREDICTION']==0].value_counts().index)
+sizes0 = list(test_origin[Col][test_origin['PREDICTION']==0].value_counts().values)
+labels0 =list(test_origin[Col][test_origin['PREDICTION']==0].value_counts().index)
 
-sizes1 = list(df[Col][df['PREDICTION']==1].value_counts().values)
-labels1 =list(df[Col][df['PREDICTION']==1].value_counts().index)
+sizes1 = list(test_origin[Col][test_origin['PREDICTION']==1].value_counts().values)
+labels1 =list(test_origin[Col][test_origin['PREDICTION']==1].value_counts().index)
 
-size = list(df[Col].value_counts().values)
-labels = list(df[Col].value_counts().index)
+size = list(test_origin[Col].value_counts().values)
+labels = list(test_origin[Col].value_counts().index)
 
 
-risque_client=df[df['SK_ID_CURR']== ID_client][Col].item()
+risque_client=test_origin[test_origin['SK_ID_CURR']== ID_client][Col].item()
 
 fig = make_subplots(rows=1, cols=3, specs=[[{'type':'domain'}, {'type':'domain'}, {'type':'domain'}]])
 
@@ -252,13 +254,13 @@ st.plotly_chart(fig, use_container_width=False, sharing="streamlit",)
 
 ## Analyse dépendance des 3 features les plus importantes
 st.markdown("<h3 style='text-align: left; color: lightblue;'>Analyse des 3 indicateurs les plus importants </h3>", unsafe_allow_html=True)
-shap.dependence_plot("EXT_SOURCE_3", shap_values[0], test)
+shap.dependence_plot("EXT_SOURCE_3", shap_value[0], test)
 st.pyplot()
 
 fig,ax=plt.subplots( figsize=(10,4))
-ax =shap.dependence_plot("CREDIT_TO_ANNUITY_RATIO", shap_values[0],test)
+ax =shap.dependence_plot("CREDIT_TO_ANNUITY_RATIO", shap_value[0],test)
 st.pyplot(fig)
 
 fig,ax=plt.subplots( figsize=(10,4))
-ax = shap.dependence_plot("EXT_SOURCE_2", shap_values[0], test)
+ax = shap.dependence_plot("EXT_SOURCE_2", shap_value[0], test)
 st.pyplot(fig)

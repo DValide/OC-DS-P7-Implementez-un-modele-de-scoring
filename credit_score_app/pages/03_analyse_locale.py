@@ -63,24 +63,23 @@ st.markdown(html_header, unsafe_allow_html=True)
 
 #Chargement des données 
 #shap_values_test = pickle.load( open( "../credit_score_app/static/data/shap_values_test.p", "rb" ) )
-#df_shap_test = pickle.load( open( "../credit_score_app/static/data/df_shap_test.p", "rb" ) )
+df_shap_test = pickle.load( open( "../credit_score_app/static/data/df_shap_test.p", "rb" ) )
 best_model = pickle.load( open( "../credit_score_app/static/data/best_model.pickle", "rb" ) )
-#df = pickle.load( open( "../credit_score_app/static/data/test_prediction.pickle", "rb" ) )
+test_origin = pickle.load( open( "../credit_score_app/static/data/test_prediction.pickle", "rb" ) )
 #test = pickle.load( open( "../credit_score_app/static/data/test_preprocess.p","rb") )
-#test = pd.read_csv('../credit_score_app/static/data/test_preprocess.csv')
+#test = pd.read_csv('../credit_score_app/static/data/test_preprocess_sample.csv')
 #test = test.set_index('SK_ID_CURR')
 
-#file_name = '../credit_score_app/static/data/pred.json'
+url = "http://127.0.0.1:5000/prediction_complete"
+#url=  "https://dash-scoring.herokuapp.com/prediction_complete"
+with urllib.request.urlopen(url) as url:
+    data = json.loads(url.read())
+    #st.write(data)
+    df =pd.DataFrame.from_dict(data)
+df = df.T
 
-#‼with open(file_name, 'r', encoding='utf-8') as f:
-#   df = json.load(f)
-# Seuil = 0.675
-import urllib
-#url = "http://127.0.0.1:5000/prediction_complete"
-url=  "https://dash-scoring.herokuapp.com/prediction_complete"
-df = urllib.request.urlopen(url).read()
-df = json.load(urllib.urlopen(url))
-#st.markdown("#  <center> :moneybag: Analyse micro :moneybag:  </center> ", unsafe_allow_html=True)
+st.write(df)
+
 
 
 st.sidebar.markdown("# 🎈 Analyse Locale ")
@@ -113,7 +112,7 @@ ID_client = st.selectbox(
 
 st.write("Exemple d'ID : 205960, 413756, 344067")
  #Récupération des informations du client
-data_client=df[df.SK_ID_CURR==int(ID_client)]
+data_client=test_origin[test_origin.SK_ID_CURR==int(ID_client)]
 col1, col2 = st.columns(2)
 with col1:
     st.write('__Info crédit__')
@@ -183,14 +182,14 @@ fig = go.Figure(go.Indicator(
              'bordercolor': 'gray',
              'steps': [{'range': [0, 40], 'color': 'Green'},
                        {'range': [40, 67.4], 'color': 'LimeGreen'},
-                       {'range': [67.4, 67.6], 'color': 'red'},
+                       {'range': [67.2, 67.8], 'color': 'red'},
                        {'range': [67.6, 80], 'color': 'Orange'},
                        {'range': [80, 100], 'color': 'Crimson'}],
              'threshold': {'line': {'color': 'white', 'width': 5},
                            'thickness': 0.20,
                            # Score du client en %
                            # df_dashboard['SCORE_CLIENT_%']
-                           'value': score}}))
+                           'value': score }}))
 
 fig.update_layout(paper_bgcolor='white',
                         height=400, width=500,
@@ -203,6 +202,17 @@ st.markdown("<h3 style='text-align: left; color: lightblue;'>Interprétabilité 
 shap.initjs()
 
 test = df.drop(columns =["Proba", "PREDICTION", "SK_ID_CURR"])
+
+explainer = shap.TreeExplainer(best_model)
+shap_value = explainer(test, check_additivity=False)
+#st.markdown(shap_value[1])
+#cols= test_origin.columns.to_list()
+client_index = df_shap_test[df_shap_test['SK_ID_CURR'] == ID_client].index.item()
+X_shap = df_shap_test.set_index('SK_ID_CURR')
+X_shap = X_shap.drop(columns = ["Proba","PREDICTION"])
+X_test_courant = X_shap.iloc[client_index]
+X_test_courant_array = X_test_courant.values.reshape(1, -1)
+                
 
 def affiche_facteurs_influence():
     ''' Affiche les facteurs d'influence du client courant
@@ -221,6 +231,7 @@ def affiche_facteurs_influence():
         """
     
     # ====================== GRAPHIQUES COMPARANT CLIENT COURANT / CLIENTS SIMILAIRES =========================== 
+    
     if st.checkbox("Voir facteurs d\'influence"):     
         
         st.markdown(html_facteurs_influence, unsafe_allow_html=True)
@@ -230,12 +241,12 @@ def affiche_facteurs_influence():
             #with st.expander('Facteurs d\'influence du client courant',
             #                  expanded=True):
                 
-            explainer = shap.TreeExplainer(best_model)
-            shap_values = explainer(test, check_additivity=False)
+            
 
 
             client_index = df[df['SK_ID_CURR'] == ID_client].index.item()
-            X_shap = df.set_index('SK_ID_CURR')
+            st.write(client_index)
+            X_shap = test_origin.set_index('SK_ID_CURR')
             X_shap = X_shap.drop(columns = ["Proba","PREDICTION"])
             X_test_courant = X_shap.iloc[client_index]
             X_test_courant_array = X_test_courant.values.reshape(1, -1)
@@ -263,18 +274,18 @@ affiche_facteurs_influence()
 st.markdown("<h3 style='text-align: left; color: lightblue;'>Voir les clients voisins</h3>", unsafe_allow_html=True)
 
 
-df['AGE']=round(abs(df['DAYS_BIRTH']/365),1)
+test_origin['AGE']=round(abs(test_origin['DAYS_BIRTH']/365),1)
   #ID_c=int(ID)
 
 #INFO CLIENT SHAP
-info_client=df[df['SK_ID_CURR']==ID_client]
+info_client=test_origin[test_origin['SK_ID_CURR']==ID_client]
 enfant_c=info_client['CNT_CHILDREN'].item()
 age_c=info_client['AGE'].item()
 genre_c=info_client['CODE_GENDER'].item()
 region_c=info_client['REGION_RATING_CLIENT'].item()
      
   #PROCHE VOISIN
-enfant_v=df[df['CNT_CHILDREN']==enfant_c]
+enfant_v=test_origin[test_origin['CNT_CHILDREN']==enfant_c]
 age_v=enfant_v[enfant_v['AGE']==age_c]
 genre_v=age_v[age_v['CODE_GENDER']==genre_c]
 region_v=genre_v[genre_v['REGION_RATING_CLIENT']==region_c]
@@ -282,7 +293,7 @@ region_v=genre_v[genre_v['REGION_RATING_CLIENT']==region_c]
 if len(region_v) < 15:
   shap_values=region_v.sample(len(region_v),random_state=42)
 if len(region_v) >= 15:
-  shap_values_test=region_v.sample(15,random_state=42)
+  shap_values=region_v.sample(15,random_state=42)
 
 fig,ax=plt.subplots( figsize=(10,4))
 plt.barh(range(len(shap_values)),shap_values['Proba'])
@@ -296,4 +307,4 @@ st.pyplot(fig)
 
 moy_vois=shap_values['Proba'].mean()
 diff_proba=round(abs(risque_client-moy_vois)*100,2)
-st.write('Le client',str(ID_client),'à un écart de',str(diff_proba),'% de risque avec les clients de profils similaires.')
+st.markdown('Le client',str(ID_client),'à un écart de',str(diff_proba),'% de risque avec les clients de profils similaires.')
