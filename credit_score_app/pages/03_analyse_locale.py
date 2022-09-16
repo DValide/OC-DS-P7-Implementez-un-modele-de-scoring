@@ -35,6 +35,7 @@ st.markdown(f""" <style>
         padding-left: {padding}rem;
         padding-bottom: {padding}rem;
     }} </style> """, unsafe_allow_html=True)
+
 #Titre
 html_header="""
     <head> 
@@ -59,14 +60,12 @@ st.markdown('<style>body{background-color: #fbfff0}</style>',unsafe_allow_html=T
 st.markdown(html_header, unsafe_allow_html=True)
 html_header
 
-#st.markdown("# Analyse locale ")
-#st.sidebar.markdown("# Analyse locale ")
 
 #Chargement des données 
 #shap_values_test = pickle.load( open( "../credit_score_app/static/data/shap_values_test.p", "rb" ) )
-df_shap_test = pickle.load( open( "../credit_score_app/static/data/df_shap_test.p", "rb" ) )
-best_model = pickle.load( open( "../credit_score_app/static/data/best_model.pickle", "rb" ) )
-test_origin = pickle.load( open( "../credit_score_app/static/data/test_prediction.pickle", "rb" ) )
+df_shap_test = pickle.load( open( "./static/data/df_shap_test.p", "rb" ) )
+best_model = pickle.load( open( "./static/data/best_model.pickle", "rb" ) )
+test_origin = pickle.load( open( "./static/data/test_prediction.pickle", "rb" ) )
 #test = pickle.load( open( "../credit_score_app/static/data/test_preprocess.p","rb") )
 #test = pd.read_csv('../credit_score_app/static/data/test_preprocess_sample.csv')
 #test = test.set_index('SK_ID_CURR')
@@ -75,7 +74,6 @@ test_origin = pickle.load( open( "../credit_score_app/static/data/test_predictio
 url=  "https://dash-scoring.herokuapp.com/prediction_complete"
 with urllib.request.urlopen(url) as url:
     data = json.loads(url.read())
-    #st.write(data)
     df =pd.DataFrame.from_dict(data)
 df = df.T
 
@@ -88,7 +86,6 @@ st.sidebar.markdown("# 🎈 Analyse Locale ")
 
 st.sidebar.markdown("Analyse locale rattachée à un client spécifique. On retrouves ses informations et son score crédit justifiée par une interprétabilité locale., Mais également des infor")
 
-#st.sidebar.markdown("<p style='text-align:center;'> <img src='https://cdn.dribbble.com/users/513906/screenshots/5384407/dribbb.gif' width='250' height='200'> </p>", unsafe_allow_html=True)
 
 html_select_client="""
     <div class="card">
@@ -200,19 +197,13 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.markdown("<h3 style='text-align: left; color: lightblue;'>Interprétabilité locale</h3>", unsafe_allow_html=True)
 
-shap.initjs()
+#shap.initjs()
 
 test = df.drop(columns =["Proba", "PREDICTION", "SK_ID_CURR"])
-
+test_set = df.drop(columns =["Proba", "PREDICTION"])
 explainer = shap.TreeExplainer(best_model)
 shap_value = explainer(test, check_additivity=False)
-#st.markdown(shap_value[1])
-#cols= test_origin.columns.to_list()
-client_index = df_shap_test[df_shap_test['SK_ID_CURR'] == ID_client].index.item()
-X_shap = df_shap_test.set_index('SK_ID_CURR')
-X_shap = X_shap.drop(columns = ["Proba","PREDICTION"])
-X_test_courant = X_shap.iloc[client_index]
-X_test_courant_array = X_test_courant.values.reshape(1, -1)
+
                 
 
 def affiche_facteurs_influence():
@@ -237,19 +228,13 @@ def affiche_facteurs_influence():
         
         st.markdown(html_facteurs_influence, unsafe_allow_html=True)
 
-        with st.spinner('**Affichpe les facteurs d\'influence du client courant...**'):                 
+        with st.spinner('**Affiche les facteurs d\'influence du client courant...**'):                 
                        
-            #with st.expander('Facteurs d\'influence du client courant',
-            #                  expanded=True):
-                
-            
-
-
-            client_index = df[df['SK_ID_CURR'] == ID_client].index.item()
-            st.write(client_index)
+            #client_index = test_set[test_set['SK_ID_CURR'] == ID_client].index.item()
+            #st.write(client_index)
             X_shap = test_origin.set_index('SK_ID_CURR')
             X_shap = X_shap.drop(columns = ["Proba","PREDICTION"])
-            X_test_courant = X_shap.iloc[client_index]
+            X_test_courant = X_shap.iloc[ID_client,:]
             X_test_courant_array = X_test_courant.values.reshape(1, -1)
                 
             shap_values_courant = explainer.shap_values(X_test_courant_array)
@@ -308,4 +293,4 @@ st.pyplot(fig)
 
 moy_vois=shap_values['Proba'].mean()
 diff_proba=round(abs(risque_client-moy_vois)*100,2)
-st.markdown('Le client',str(ID_client),'à un écart de',str(diff_proba),'% de risque avec les clients de profils similaires.')
+st.write('Le client',str(ID_client),'à un écart de',str(diff_proba),'% de risque avec les clients de profils similaires.')
