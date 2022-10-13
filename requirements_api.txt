@@ -1,0 +1,10 @@
+pandas >=1.4
+seaborn >=0.11
+streamlit >= 1.12.0
+matplotlib >= 3.5.1
+sklearn >= 0.0
+Pillow >= 9.1.1
+plotly >= 5.10.0
+shap >= 0.41.0
+streamlit_shap >= 1.0.2
+imblearn >= 0.0
