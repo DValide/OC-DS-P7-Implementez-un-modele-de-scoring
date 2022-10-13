@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html >
+<!--https://codepen.io/DominicFrancois/pen/naqQja-->
+<head>
+  <meta charset="UTF-8">
+<link href='https://fonts.googleapis.com/css?family=Ubuntu:500' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style2.css') }}">
+
+</head>
+
+<body>
+  <div class="login">
+    <div class="login-header">
+      <h1>API de prédiction</h1>
+    </div>
+
+	  <h2>Prédiction sur le risque de défaut pour un prêt bancaire</h2>
+    <div class="login-form">
+      <h3>Identifiant client:</h3>
+      <form action="{{ url_for('predict')}}"method="post">
+        <input type="text" name="id_client" placeholder="id_client" required="required" value="{{ request.form['id_client'] }}"/><br>
+    
+        <input type="button" value="Prédire" class="login-button"/>
+      </form>
+
+      <br>
+      <br>
+		  {{ prediction_text }}
+  </div>
+</div>
+</body>
+</html>
